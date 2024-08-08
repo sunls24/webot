@@ -1,0 +1,9 @@
+mode: desktop
+storage: webot.json
+
+openai:
+  api_key: sk-xxx
+  model: gpt-3.5-turbo
+
+db:
+  dsn: webot.db
