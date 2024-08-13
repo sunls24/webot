@@ -6,6 +6,7 @@ require (
 	github.com/eatmoreapple/openwechat v1.4.7
 	github.com/glebarez/sqlite v1.11.0
 	github.com/ilyakaznacheev/cleanenv v1.5.0
+	github.com/robfig/cron/v3 v3.0.1
 	github.com/tidwall/gjson v1.17.3
 	gorm.io/gorm v1.25.11
 )

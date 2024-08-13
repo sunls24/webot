@@ -2,7 +2,6 @@ package constants
 
 import (
 	"fmt"
-	"github.com/eatmoreapple/openwechat"
 )
 
 const (
@@ -29,26 +28,17 @@ const (
 	ErrorTip = `%s 哎呀，出错了！
 ------------------
 %v`
+	V2exTip = "V2EX 热帖推送: %s"
 )
 
-func HelpText(sender *openwechat.User) string {
-	return fmt.Sprintf(`%s 你好，%s
-%s 欢迎使用 %s:v%s
---------------------------
-- help 查看帮助信息
-- clear 清空聊天记录
-- v2ex 热贴推送（关闭）
-- news 每日新闻推送（关闭）`, openwechat.Emoji.LetMeSee, sender.NickName, openwechat.Emoji.Respect, AppName, Version)
+func Code(code string) string {
+	if code == "" {
+		return code
+	}
+	return fmt.Sprintf("```\n%s\n```", code)
 }
 
-func ThinkText() string {
-	return fmt.Sprintf(ThinkTip, openwechat.Emoji.Smart)
-}
-
-func ClearText() string {
-	return fmt.Sprintf(ClearTip, openwechat.Emoji.Doge)
-}
-
-func ErrorText(err error) string {
-	return fmt.Sprintf(ErrorTip, openwechat.Emoji.Awkward, err)
-}
+const (
+	OFF = "OFF"
+	ON  = "ON"
+)

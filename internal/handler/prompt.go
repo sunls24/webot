@@ -45,7 +45,7 @@ func (h *Handler) summarize(avatarID, nickName string, messages []openai.Message
 		Content: summarize,
 	})
 
-	result, err := h.AI.Chat(h.Cfg.OpenAI.Model, messages)
+	result, err := h.AI.Chat(h.Cfg.GetModel(true), messages)
 	if err != nil {
 		slog.Error("AI chat failed", attr, slog.Any("err", err))
 		return

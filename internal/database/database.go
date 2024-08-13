@@ -25,5 +25,5 @@ func Connect(cfg *config.Config) (*DB, error) {
 }
 
 func migrate(db *gorm.DB) error {
-	return db.AutoMigrate(&entity.Message{})
+	return db.AutoMigrate(&entity.Message{}, &entity.V2ex{}, &entity.Settings{})
 }

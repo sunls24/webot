@@ -2,11 +2,12 @@ package app
 
 import (
 	"fmt"
-	"log/slog"
 	"webot/config"
 	"webot/internal/bot"
+	"webot/internal/cache"
 	"webot/internal/constants"
 	"webot/internal/context"
+	"webot/internal/cron"
 )
 
 func Run(cfg *config.Config) {
@@ -14,7 +15,8 @@ func Run(cfg *config.Config) {
 	fmt.Println(constants.Welcome)
 	fmt.Printf("======== %s:v%s ========\n", constants.AppName, constants.Version)
 
-	slog.Info("login mode: " + string(cfg.Mode))
 	ctx := context.NewContext(cfg)
+	cache.InitSettings(ctx.DB)
+	cron.Start(ctx)
 	bot.Block(ctx)
 }

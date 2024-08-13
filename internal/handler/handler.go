@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/eatmoreapple/openwechat"
 	"log/slog"
-	"strings"
 	"time"
 	"webot/internal/constants"
 	"webot/internal/context"
@@ -81,11 +80,14 @@ func (h *Handler) handler(msg *openwechat.Message) {
 	}
 	ctx.sender = sender
 
+	slog.Info(fmt.Sprintf("%s: %s", ctx.main, msg.Content))
 	switch {
 	case isFunc(msg.Content, types.FuncHelp):
 		h.onHelp(msg, ctx)
 	case isFunc(msg.Content, types.FuncClear):
 		h.onClear(msg, ctx)
+	case isFunc(msg.Content, types.FuncV2ex):
+		h.onToggle(msg, ctx, types.PushV2ex)
 	default:
 		h.onText(msg, ctx)
 	}
@@ -95,37 +97,12 @@ func (h *Handler) handler(msg *openwechat.Message) {
 	}
 }
 
-func isFunc(content string, cmd types.Func) bool {
-	content = strings.TrimSpace(content)
-	return len(content) == len(cmd) && strings.ToLower(content) == string(cmd)
-}
-
-func (h *Handler) onHelp(msg *openwechat.Message, ctx params) {
-	_, err := msg.ReplyText(constants.HelpText(ctx.sender))
-	if err != nil {
-		slog.Error("reply help failed", slog.Any("err", err))
-	}
-}
-
-func (h *Handler) onClear(msg *openwechat.Message, ctx params) {
-	attr := slog.String("F", "onClear")
-
-	err := h.DB.DeleteMessagesByAvatarID(ctx.main.AvatarID())
-	if err != nil {
-		slog.Error("delete messages failed", attr, slog.Any("err", err))
-	}
-	_, err = msg.ReplyText(ctx.atUser + constants.ClearText())
-	if err != nil {
-		slog.Error("reply clear failed", slog.Any("err", err))
-	}
-}
-
 func onThink(msg *openwechat.Message, done <-chan struct{}, atUser string) {
 	select {
 	case <-done:
 		return
 	case <-time.After(time.Second * 2):
-		_, err := msg.ReplyText(atUser + constants.ThinkText())
+		_, err := msg.ReplyText(atUser + thinkText())
 		if err != nil {
 			slog.Error("reply think failed", slog.Any("err", err))
 		}
@@ -141,17 +118,21 @@ func (h *Handler) onText(msg *openwechat.Message, ctx params) {
 		slog.Error("get messages failed", attr, slog.Any("err", err))
 		return
 	}
-	current := openai.Message{Role: openai.RUser, Content: fmt.Sprintf("%s: %s", ctx.sender.NickName, msg.Content)}
+	msgContent := msg.Content
+	if ctx.atUser != "" {
+		msgContent = fmt.Sprintf("%s: %s", ctx.sender.NickName, msgContent)
+	}
+	current := openai.Message{Role: openai.RUser, Content: msgContent}
 	messages = BuildMessages(messages, current, ctx)
 
 	done := make(chan struct{}, 1)
 	go onThink(msg, done, ctx.atUser)
 	start := time.Now()
-	result, err := h.AI.Chat(h.Cfg.OpenAI.Model, messages)
+	result, err := h.AI.Chat(h.Cfg.GetModel(false), messages)
 	if err != nil {
 		done <- struct{}{}
 		slog.Error("AI chat failed", attr, slog.Any("err", err))
-		_, err = msg.ReplyText(ctx.atUser + constants.ErrorText(err))
+		_, err = msg.ReplyText(ctx.atUser + errorText(err))
 		if err != nil {
 			slog.Error("reply error failed", attr, slog.Any("err", err))
 		}
@@ -188,5 +169,5 @@ func onFriendAdd(msg *openwechat.Message) {
 		return
 	}
 	slog.Info("agree friend add", slog.String("NickName", f.NickName))
-	_, _ = f.SendText(constants.HelpText(f.User))
+	_, _ = f.SendText(helpText(f.User, f.User))
 }

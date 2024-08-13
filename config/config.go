@@ -15,9 +15,10 @@ type (
 	}
 
 	OpenAI struct {
-		BaseURL string `yaml:"base_url" env:"OPENAI_BASE_URL" env-default:"https://api.openai.com"`
-		APIKey  string `yaml:"api_key" env:"OPENAI_API_KEY" env-required:"true"`
-		Model   string `yaml:"model" env:"OPENAI_MODEL" env-default:"gpt-3.5-turbo"`
+		BaseURL   string `yaml:"base_url" env:"OPENAI_BASE_URL" env-default:"https://api.openai.com"`
+		APIKey    string `yaml:"api_key" env:"OPENAI_API_KEY" env-required:"true"`
+		Model     string `yaml:"model" env:"OPENAI_MODEL" env-default:"gpt-3.5-turbo"`
+		SlowModel string `yaml:"slow_model" env:"OPENAI_SLOW_MODEL" env-default:"gpt-4"`
 	}
 
 	DB struct {

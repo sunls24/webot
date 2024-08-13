@@ -3,7 +3,6 @@ package bot
 import (
 	"fmt"
 	"github.com/eatmoreapple/openwechat"
-	"io"
 	"log/slog"
 	"time"
 	"webot/internal/context"
@@ -11,7 +10,6 @@ import (
 )
 
 var bot *openwechat.Bot
-var storage io.ReadWriteCloser
 
 func GetBot() *openwechat.Bot {
 	return bot
@@ -22,8 +20,6 @@ const (
 )
 
 func Block(ctx context.Context) {
-	storage = openwechat.NewFileHotReloadStorage(ctx.Cfg.Storage)
-	defer storage.Close()
 
 	for {
 		if err := syncBot(ctx); err != nil {
@@ -43,14 +39,20 @@ func syncBot(ctx context.Context) error {
 	bot.LoginCallBack = loginCallback
 	bot.ScanCallBack = scanCallback
 
-	slog.Info("start login")
+	slog.Info("start login", slog.String("mode", string(ctx.Cfg.Mode)))
+	var storage = ctx.Cfg.NewStorage()
 	if err := bot.HotLogin(storage); err != nil {
+		_ = storage.Close()
 		slog.Warn("hot login failed, try push login", slog.Any("err", err))
+		storage = ctx.Cfg.NewStorage()
 		if err = bot.PushLogin(storage, openwechat.NewRetryLoginOption()); err != nil {
+			_ = storage.Close()
 			return fmt.Errorf("push login: %w", err)
 		}
 	}
+	defer storage.Close()
 	slog.Info("login complete, start sync messages")
+
 	return bot.Block()
 }
 

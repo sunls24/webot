@@ -1,9 +1,11 @@
 package openai
 
 import (
+	"errors"
 	"fmt"
 	"github.com/tidwall/gjson"
 	"net/http"
+	"webot/pkg/client"
 )
 
 type OpenAI struct {
@@ -30,12 +32,16 @@ func (oai *OpenAI) Chat(model string, messages []Message) (*Message, error) {
 		Temperature: 0.5,
 	}
 
-	req, _ := http.NewRequest(http.MethodPost, oai.opts.BaseURL+api, marshalBody(reqBody))
+	req, _ := http.NewRequest(http.MethodPost, oai.opts.BaseURL+api, client.MarshalBody(reqBody))
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", oai.opts.APIKey))
-	resp, err := do(req)
+	resp, err := client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %s", err, string(resp))
+		return nil, err
 	}
-	return NewMessage(gjson.GetBytes(resp, "choices.0.message")), nil
+	message := NewMessage(gjson.GetBytes(resp, "choices.0.message"))
+	if message.Role == "" {
+		return nil, errors.New(string(resp))
+	}
+	return message, nil
 }
