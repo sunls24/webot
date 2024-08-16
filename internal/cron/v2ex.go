@@ -2,7 +2,6 @@ package cron
 
 import (
 	"fmt"
-	"github.com/tidwall/gjson"
 	"log/slog"
 	"net/http"
 	"strings"
@@ -13,10 +12,12 @@ import (
 	"webot/internal/types"
 	"webot/pkg/client"
 	"webot/pkg/openai"
+
+	"github.com/tidwall/gjson"
 )
 
 const (
-	v2exSpec       = "30 8-18/3 * * *"
+	v2exSpec       = "30 10-18/3 * * *"
 	v2exHotAPI     = "https://www.v2ex.com/api/topics/hot.json"
 	v2exRepliesAPI = "https://www.v2ex.com/api/replies/show.json?topic_id="
 )
@@ -62,7 +63,7 @@ func (ctx v2ex) run() {
 			Title: title,
 		})
 	}
-	if err = PushToAll("V2EX 热帖推送"+v2exSplit+strings.Join(summarizeList, v2exSplit), types.PushV2ex); err != nil {
+	if err = PushToAll(v2exHeader+strings.Join(summarizeList, v2exSplit)+v2exSplit+v2exFooter, types.PushV2ex); err != nil {
 		slog.Error("push v2ex post failed", slog.Any("err", err))
 	}
 }
@@ -106,5 +107,10 @@ AI 点评：%s
 
 const (
 	v2exSystem = "你擅长点评 V2EX 论坛热门帖子，从主题内容和回复中提取关键信息，并使用 60 个汉字以内的简洁描述。"
-	v2exSplit  = "\n---------------\n"
+	v2exSplit  = "\n-------------------\n"
+
+	v2exHeader = `V2EX 热帖推送
+---------------
+`
+	v2exFooter = "输入 v2ex 关闭推送"
 )

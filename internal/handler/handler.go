@@ -105,7 +105,7 @@ func onThink(msg *openwechat.Message, done <-chan struct{}, atUser string) {
 	select {
 	case <-done:
 		return
-	case <-time.After(time.Second * 2):
+	case <-time.After(time.Second * 5):
 		_, err := msg.ReplyText(atUser + thinkText())
 		if err != nil {
 			slog.Error("reply think failed", slog.Any("err", err))
@@ -132,7 +132,7 @@ func (h *Handler) onText(msg *openwechat.Message, ctx params) {
 	done := make(chan struct{}, 1)
 	go onThink(msg, done, ctx.atUser)
 	start := time.Now()
-	result, err := h.AI.Chat(h.Cfg.GetModel(false), messages)
+	result, err := h.AI.Chat(h.Cfg.GetModel(false), messages, openai.Google)
 	if err != nil {
 		done <- struct{}{}
 		slog.Error("AI chat failed", attr, slog.Any("err", err))

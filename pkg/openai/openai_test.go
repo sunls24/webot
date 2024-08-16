@@ -1,7 +1,6 @@
 package openai
 
 import (
-	"fmt"
 	"os"
 	"testing"
 )
@@ -24,11 +23,11 @@ func TestOpenAI_Chat(t *testing.T) {
 	msg, err := openai.Chat(model, []Message{
 		{
 			Role:    RUser,
-			Content: "help me calculate 1+2*3",
+			Content: "help me search linux.do",
 		},
-	})
+	}, Google)
 	if err != nil {
 		t.Fatal(err)
 	}
-	fmt.Println(msg.Role, msg.Content)
+	t.Logf("%s: %s\n", msg.Role, msg.Content)
 }
