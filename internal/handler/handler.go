@@ -51,6 +51,10 @@ func (h *Handler) handler(msg *openwechat.Message) {
 		return
 	}
 
+	if sender.IsMP() {
+		return
+	}
+
 	//if !sender.IsPin() {
 	//	return
 	//}

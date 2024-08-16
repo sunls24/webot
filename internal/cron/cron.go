@@ -15,8 +15,9 @@ import (
 func Start(ctx context.Context) {
 	task := cron.New()
 	_, _ = task.AddFunc(v2exSpec, v2ex(ctx).run)
+	_, _ = task.AddFunc(aliveSpec, alive(ctx).run)
 	task.Start()
-	slog.Info("start cron", slog.String("v2ex", v2exSpec))
+	slog.Info("start cron", slog.String("v2ex", v2exSpec), slog.String("alive", aliveSpec))
 }
 
 func PushToAll(content string, key types.SettingsKey) error {

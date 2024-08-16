@@ -25,8 +25,9 @@ type v2ex context.Context
 
 func (ctx v2ex) run() {
 	slog.Info("cron v2ex run")
+	attr := slog.String("F", "v2ex.run")
 	if !bot.GetBot().Alive() {
-		slog.Warn("bot is not alive")
+		slog.Warn("bot is not alive", attr)
 		return
 	}
 
