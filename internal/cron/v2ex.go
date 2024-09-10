@@ -63,6 +63,9 @@ func (ctx v2ex) run() {
 			Title: title,
 		})
 	}
+	if len(summarizeList) == 0 {
+		return
+	}
 	if err = PushToAll(v2exHeader+strings.Join(summarizeList, v2exSplit)+v2exSplit+v2exFooter, types.PushV2ex); err != nil {
 		slog.Error("push v2ex post failed", slog.Any("err", err))
 	}
@@ -88,7 +91,8 @@ func (ctx v2ex) v2exSummarize(id, member, title, content, url string) (string, e
 	}
 	messages := []openai.Message{
 		{Role: openai.RSystem, Content: v2exSystem},
-		{Role: openai.RUser, Content: fmt.Sprintf(`标题：%s
+		{Role: openai.RUser, Content: fmt.Sprintf(`帖子内容如下:
+标题：%s
 作者：%s
 内容：%s
 回复列表：
